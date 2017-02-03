@@ -11,20 +11,39 @@ import { feedRouter } from './routes/feed';
 import {studyEntityRouter} from './routes/study_entity';
 import { userRouter } from './routes/user';
 import * as models from './models';
+import * as passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
+import * as cookieParser from 'cookie-parser';
+import * as expressSession from 'express-session';
 
 const app: express.Application = express();
 
 app.disable('x-powered-by');
 
 app.use(cors());
-app.use(json());
 app.use(compression());
 app.use(urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(json());
+app.use(expressSession({
+  secret: 'keyboard cat',
+  resave: true,
+  saveUninitialized: true
+}));
 
 // passport
+app.use(passport.initialize());
+app.use(passport.session());
 
-let passport = require('passport');
-let LocalStrategy = require('passport-local').Strategy;
+passport.serializeUser(function(user:{id}, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  models.User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
 
 passport.use(new LocalStrategy({
         usernameField: 'email',
@@ -33,21 +52,22 @@ passport.use(new LocalStrategy({
     function (email, password, done){
         models.User.findOne({'email': email})
         .exec((err, user) => {
-            if (err || !user) {
-                user = {};
+            if (err) { return done(err); }
+            if (!user) {
+                return done(null, false, {message: 'Incorrect username.'});
             }
             if (password === user.password) {
-                done(true);
+                return done(null, user);
             } else {
-                return done(null, false, {massage: 'Wrong data'});
+                return done(null, false, {message: 'Incorrect password.'});
             }
         });
     }
 ));
 
 app.post('/login/test', passport.authenticate('local',
-    { failureRedirect: 'http://localhost:4200',
-      successRedirect: 'http://localhost:4200/profile'}));
+    { failureRedirect: 'http://localhost:4200/#/auth',
+      successRedirect: 'http://localhost:4200/#/profile'}));
 
 // api routes
 app.use('/api/secure', protectedRouter);

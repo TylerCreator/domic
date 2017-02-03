@@ -13,9 +13,9 @@
           <div class="panel-body">
             <div class="row">
               <div class="col-lg-12 col-sm-12 col-md-12">
-                <form id="login-form" action="" method="post" role="form" style="display: block;">
+                <form (ngSubmit)="onSubmit()" id="login-form" action="http://localhost:4300/login/test" method="post"  style="display: block;">
                   <div class="form-group">
-                    <input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Имя пользователя" value="">
+                    <input type="text" name="email" id="username" tabindex="1" class="form-control" placeholder="Имя пользователя" value="">
                   </div>
                   <div class="form-group">
                     <input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Пароль">
@@ -24,7 +24,7 @@
                   <div class="form-group">
                     <div class="row">
                       <div class="col-sm-6 col-sm-offset-3">
-                        <input type="submit"  name="login-submit" id="login-submit" tabindex="4" class="form-control btn btn-login" value="Войти">
+                        <button type="submit"   name="login-submit" id="login-submit" tabindex="4" class="form-control btn btn-login" >Войти</button>
                       </div>
                     </div>
                   </div>
